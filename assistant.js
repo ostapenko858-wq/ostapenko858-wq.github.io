@@ -11,6 +11,7 @@
   const PHONE = root.dataset.phone;
   // Сервер на Railway пересылает расчёт основательнице в Telegram (без контактов посетителя)
   const ENDPOINT = root.dataset.endpoint;
+  const BOT = root.dataset.bot;
   const RUNNING = 2000; // ₽ в месяц: сервер + нейросеть, середина вилки 1 200–2 500
 
   const TASKS = {
@@ -43,7 +44,7 @@
     {key: 'budget', q: 'Последний вопрос: какой бюджет на разработку для вас комфортен?', options: () => [[40000, 'До 40 000 ₽'], [70000, '40–70 000 ₽'], [150000, '70–150 000 ₽'], [0, 'Пока не знаю']]}
   ];
 
-  let answers, idx;
+  let answers, idx, skipped, startedAt;
   const rub = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
   const months = n => n < 1 ? '1 месяц' : (n => n % 10 === 1 && n % 100 !== 11 ? n + ' месяц' : (n % 10 >= 2 && n % 10 <= 4 && !(n % 100 >= 12 && n % 100 <= 14) ? n + ' месяца' : n + ' месяцев'))(Math.ceil(n));
 
@@ -63,7 +64,7 @@
 
   function ask() {
     const s = STEPS[idx];
-    counter.textContent = `Вопрос ${idx + 1} из ${STEPS.length}`;
+    counter.textContent = `Вопрос ${idx + 1 - skipped} из ${STEPS.length - skipped}`;
     typing(() => {
       say(typeof s.q === 'function' ? s.q(answers) : s.q);
       opts.innerHTML = '';
@@ -121,10 +122,10 @@
     if (net <= 0) {
       verdict = `<p class="as-verdict bad">Честно: по этим цифрам помощник себя не окупит. Экономия меньше, чем он стоит в месяц. Возможно, вам пока дешевле оставить всё как есть, и на аудите мы скажем то же самое.</p>`;
     } else {
-      const fast = p0 / net, slow = p1 / net;
+      const fast = p0 / net, slow = p1 / net, middle = (fast + slow) / 2;
       const range = p0 === p1 ? months(fast) : (Math.ceil(fast) === Math.ceil(slow) ? months(fast) : `${Math.ceil(fast)}–${months(slow)}`);
-      if (slow <= 6) verdict = `<p class="as-verdict good">Окупится примерно за ${range}. Дальше экономия остаётся вам.</p>`;
-      else if (fast <= 12) verdict = `<p class="as-verdict mid">Окупится, но не быстро: примерно за ${range}. Стоит начать с самой затратной части процесса, тогда срок сократится.</p>`;
+      if (middle <= 6) verdict = `<p class="as-verdict good">Окупится за счёт освободившегося времени примерно за ${range}.</p>`;
+      else if (middle <= 12) verdict = `<p class="as-verdict mid">Окупится, но не быстро: примерно за ${range}. Стоит начать с самой затратной части процесса, тогда срок сократится.</p>`;
       else verdict = `<p class="as-verdict bad">Окупаться будет дольше года. Обсудим на аудите, есть ли смысл: иногда выгоднее не делать.</p>`;
     }
 
@@ -132,14 +133,18 @@
     if (answers.when === 'fast') notes.push(t.ready ? 'По срокам успеваем: готовое решение настраиваем под вас около 2 недель.'
       : 'За 2 недели реально запустить первую версию одного сценария, остальное — следующим шагом.');
     if (answers.budget && answers.budget < p0) notes.push('Бюджет пока ниже нижней границы. Можно начать с самого затратного кусочка процесса или вернуться к этому позже.');
-    if (answers.budget && answers.budget >= p0) notes.push('В бюджет укладываемся.');
+    else if (answers.budget && answers.budget < p1) notes.push('Бюджета хватит на простой вариант: один сценарий без сложных интеграций. Остальное можно добавить потом.');
+    else if (answers.budget) notes.push('В бюджет укладываемся.');
+    notes.push(answers.who === 'spec'
+      ? 'Деньги из этого расчёта появятся, если занять освободившиеся часы клиентами или не брать работу на вечер.'
+      : 'Это стоимость часов сотрудника: они уходят на другую работу или позволяют не нанимать ещё одного человека.');
 
     typing(() => {
       say(`<div class="as-result">
         <p class="as-r-title">Что подойдёт</p><p>${t.solution}.</p>
         <dl>
           <div><dt>Освободится</dt><dd>~${Math.round(freed)} ч в месяц</dd></div>
-          <div><dt>Это в деньгах</dt><dd>~${rub(saved)} в месяц</dd></div>
+          <div><dt>Стоимость этого времени</dt><dd>~${rub(saved)} в месяц</dd></div>
           <div><dt>Разработка</dt><dd>${priceText}</dd></div>
           <div><dt>Срок</dt><dd>${t.weeks}</dd></div>
           <div><dt>Расходы после запуска</dt><dd>1 200–2 500 ₽ в месяц</dd></div>
@@ -148,54 +153,47 @@
         ${notes.map(n => `<p class="as-note">${n}</p>`).join('')}
         <p class="as-small">Считали осторожно: помощник берёт на себя около ${Math.round(t.share * 100)}% этой работы. Точные цифры — после бесплатного аудита.</p>
       </div>`);
-      const summary = [
-        'Расчёт с сайта Живой компании',
-        'Кто: ' + (answers.who === 'spec' ? 'специалист' : 'бизнес'),
-        'Задача: ' + t.label + (answers.otherText ? ' — ' + answers.otherText : ''),
-        'Часов в неделю: ' + answers.hours,
-        'Освободится: ~' + Math.round(freed) + ' ч/мес, ~' + rub(saved) + '/мес',
-        'Срок: ' + {fast: '2 недели', month: 'месяц', later: 'не спешу'}[answers.when],
-        'Бюджет: ' + (answers.budget ? 'до ' + rub(answers.budget) : 'не знаю')
-      ].join('\n');
-      report(t, freed, saved, verdict.replace(/<[^>]+>/g, ''));
-      opts.innerHTML = '';
-      let copied = false;
-      const link = (href, text, cls) => {
-        const a = document.createElement('a');
-        a.className = cls; a.href = href; a.textContent = text;
-        if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener'; }
-        a.onclick = () => {
-          if (copied || href.startsWith('tel:')) return;
-          copied = true;
-          try { navigator.clipboard.writeText(summary); } catch (e) {}
-          say('Расчёт скопирован. Вставьте его в сообщение, и мы ответим с разбором вашей задачи.');
+      // Код расчёта зашит в ссылку на бота: по нему бот находит расчёт и отдаёт его основательнице. Человек кода не видит
+      const code = Array.from({length: 6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
+      report(t, freed, saved, verdict.replace(/<[^>]+>/g, ''), code);
+      typing(() => {
+        say(ENDPOINT
+          ? 'Если расчёт вам подходит, давайте обсудим. Кнопка «Обсудить в Telegram» откроет наш чат, и расчёт уже будет у нас: пересказывать ничего не нужно.'
+          : 'Если расчёт вам подходит, давайте обсудим: напишите нам в Telegram или ВК, либо позвоните.');
+        opts.innerHTML = '';
+        const link = (href, text, cls) => {
+          const a = document.createElement('a');
+          a.className = cls; a.href = href; a.textContent = text;
+          if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener'; }
+          return a;
         };
-        return a;
-      };
-      const again = document.createElement('button');
-      again.type = 'button'; again.className = 'as-again'; again.textContent = 'Посчитать заново';
-      again.onclick = start;
-      opts.append(link(TG, 'Написать в Telegram', 'as-send'), link(VK_CHAT, 'Написать в ВК', 'as-send as-alt'),
-                  link(PHONE, 'Позвонить', 'as-send as-alt'), again);
+        const again = document.createElement('button');
+        again.type = 'button'; again.className = 'as-again'; again.textContent = 'Посчитать заново';
+        again.onclick = start;
+        const tg = ENDPOINT ? `https://t.me/${BOT}?start=calc_${code}` : TG;
+        opts.append(link(tg, 'Обсудить в Telegram', 'as-send'), link(PHONE, 'Позвонить', 'as-send as-alt'),
+                    link(VK_CHAT, 'Написать в ВК', 'as-send as-alt'), again);
+      });
     });
   }
 
-  function report(t, freed, saved, verdict) {
+  function report(t, freed, saved, verdict, code) {
     if (!ENDPOINT) return;
     const data = {
       who: answers.who, task: t.label, other: answers.otherText || '', hours: answers.hours, rate: answers.rate,
       when: answers.when, budget: answers.budget, freed: Math.round(freed), saved: Math.round(saved),
-      verdict, page: location.pathname
+      verdict, page: location.pathname, code, seconds: Math.round((Date.now() - startedAt) / 1000)
     };
     // text/plain без чтения ответа — простой запрос, браузеру не нужен предварительный CORS-запрос
     try { fetch(ENDPOINT, {method: 'POST', mode: 'no-cors', keepalive: true, headers: {'Content-Type': 'text/plain'}, body: JSON.stringify(data)}); } catch (e) {}
   }
 
   function start() {
-    answers = {}; idx = 0;
+    answers = {}; idx = 0; skipped = 0; startedAt = Date.now();
     log.innerHTML = ''; opts.innerHTML = '';
-    say('Здравствуйте. Я помощник «Живой компании». За шесть вопросов прикину, сколько времени и денег вам может вернуть ИИ, сколько это стоит и когда окупится. Если не окупится, так и скажу.');
-    if (root.dataset.who) { answers.who = root.dataset.who; idx = 1; }
+    if (root.dataset.who) { answers.who = root.dataset.who; idx = skipped = 1; }
+    const count = ['шесть', 'пять'][skipped];
+    say(`Здравствуйте. Я помощник «Живой компании». За ${count} вопросов прикину, сколько времени вам может вернуть ИИ, сколько это стоит и когда окупится. Если не окупится, так и скажу.`);
     ask();
   }
 

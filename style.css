@@ -1,5 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Golos+Text:wght@400;500;600&display=swap');
 :root{--green:#2E5E30;--forest:#24502A;--deep:#1C3F20;--leaf:#7BA84A;--copper:#B8742A;--gold:#E8B06A;--beige:#F1E8DA;--beige-2:#E3D5BD;--cream:#FCF7EE;--ink:#1F2E20;--muted:#5B6858;--display:'Montserrat',system-ui,sans-serif;--text:'Golos Text',system-ui,sans-serif}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:24px}
@@ -371,3 +370,61 @@ footer.site .legal{flex-basis:100%;margin:0;color:rgba(241,232,218,.55)}
 .cta .cta-actions .btn-vk-outline{font-size:15px}
 .as-opts .as-alt{border-color:var(--green);background:#fff}
 @media(max-width:640px){.contacts{grid-template-columns:minmax(0,1fr)}}
+
+/* Живость: кнопки пружинят, плитки приподнимаются */
+.btn-vk,.btn-vk-outline,.nav a,.as-opts button,.as-send,.contact{transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s ease,background .15s ease,color .15s ease}
+.btn-vk:hover,.btn-vk-outline:hover,.nav a:hover,.as-opts button:hover,.as-send:hover{transform:translateY(-2px)}
+.btn-vk:active,.btn-vk-outline:active,.nav a:active,.as-opts button:active,.as-send:active{transform:translateY(1px) scale(.97)}
+.btn-vk:hover,.as-send:not(.as-alt):hover{box-shadow:0 12px 22px -10px rgba(184,116,42,.8)}
+.nav a.primary{animation:glow 3.4s ease-in-out infinite}
+@keyframes glow{0%,60%,100%{box-shadow:0 0 0 0 rgba(232,176,106,0)}30%{box-shadow:0 0 0 9px rgba(232,176,106,.2)}}
+.as-msg,.as-opts>*{animation:pop .35s cubic-bezier(.3,1.5,.5,1) both}
+.as-opts>*:nth-child(2){animation-delay:.05s}.as-opts>*:nth-child(3){animation-delay:.1s}.as-opts>*:nth-child(4){animation-delay:.15s}
+.as-opts>*:nth-child(5){animation-delay:.2s}.as-opts>*:nth-child(6){animation-delay:.25s}.as-opts>*:nth-child(n+7){animation-delay:.3s}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.96)}}
+.scen,.doubt,.ctl,.price,.steps li,.task,.case,.pains figure{transition:transform .3s cubic-bezier(.3,1.4,.5,1),box-shadow .3s ease}
+.scen:hover,.doubt:hover,.ctl:hover,.price:hover,.steps li:hover,.task:hover,.case:hover{transform:translateY(-6px);box-shadow:0 28px 44px -30px rgba(28,63,32,.6)}
+
+/* «Узнаёте себя?» — заметки на кнопке */
+.pains{gap:26px}
+.pains figure{position:relative;background:#FFFDF7;box-shadow:0 16px 28px -22px rgba(28,63,32,.55)}
+.pains figure::before{content:"";position:absolute;top:-8px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#E8B06A,var(--copper));box-shadow:0 3px 6px rgba(0,0,0,.25)}
+.pains figure:nth-child(3n+1){transform:rotate(-1.4deg)}
+.pains figure:nth-child(3n+2){transform:rotate(1deg)}
+.pains figure:nth-child(3n){transform:rotate(-.5deg)}
+.pains figure:hover{transform:rotate(0) translateY(-6px);box-shadow:0 28px 40px -26px rgba(28,63,32,.6)}
+
+/* Карточки постов ВК выглядывают сбоку */
+.scens{row-gap:36px}
+.scen{position:relative}
+.scen .peek{position:absolute;z-index:2;top:-20px;right:-12px;width:84px;height:auto;border-radius:10px;transform:rotate(7deg);transform-origin:top right;box-shadow:0 14px 24px -10px rgba(0,0,0,.45);transition:transform .35s cubic-bezier(.3,1.5,.5,1)}
+.scen:nth-child(even) .peek{transform:rotate(-6deg)}
+.scen:hover .peek{transform:rotate(0) scale(1.9)}
+.scen.has-card .scen-for,.scen.has-card h3{padding-right:78px}
+.cases{row-gap:70px;padding-top:40px}
+.case{overflow:visible}
+.case .peek{position:absolute;top:-56px;right:22px;width:96px;height:auto;border-radius:12px;transform:rotate(6deg);box-shadow:0 18px 30px -12px rgba(0,0,0,.55);transition:transform .35s cubic-bezier(.3,1.5,.5,1)}
+.case:nth-child(2) .peek{transform:rotate(-5deg)}
+.case:hover .peek{transform:rotate(0) scale(1.25) translateY(-8px)}
+.case h3{padding-right:0}
+
+/* Веер карточек за помощником */
+.stage{position:relative}
+.stage .fan{position:absolute;z-index:0;width:190px;height:auto;border-radius:16px;box-shadow:0 24px 40px -16px rgba(0,0,0,.6);transition:transform .5s cubic-bezier(.3,1.4,.5,1)}
+.stage .fan-1{bottom:-46px;left:-64px;width:175px;transform:rotate(-10deg)}
+.stage .fan-2{top:-14px;right:-58px;width:175px;transform:rotate(8deg)}
+.stage .assistant{position:relative;z-index:1;transform:rotate(1.2deg);transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.stage:hover .assistant,.stage:focus-within .assistant{transform:rotate(0)}
+.stage:hover .fan-1{transform:rotate(-15deg) translate(-18px,6px)}
+.stage:hover .fan-2{transform:rotate(14deg) translateX(18px)}
+.hero.has-assistant .hero-text{position:relative;z-index:2}
+
+/* Появление сбоку при прокрутке (site.js) */
+.motion .rv{opacity:0;translate:-48px 0;rotate:-1deg;transition:opacity .7s ease var(--d,0s),translate .8s cubic-bezier(.2,.9,.3,1.1) var(--d,0s),rotate .8s ease var(--d,0s),transform .3s cubic-bezier(.3,1.4,.5,1),box-shadow .3s ease}
+.motion .rv.rv-r{translate:48px 0;rotate:1deg}
+.motion .rv.in{opacity:1;translate:0 0;rotate:0deg}
+@media(max-width:1020px){.stage .fan{display:none}.stage .assistant{transform:none}}
+@media(max-width:640px){.motion .rv,.motion .rv.rv-r{translate:0 24px;rotate:0deg}.scen:hover .peek{transform:rotate(0) scale(1.4)}}
+@media(prefers-reduced-motion:reduce){.nav a.primary,.as-msg,.as-opts>*{animation:none}}
+
+.cta .cta-note{margin-top:-10px;font-size:14px;color:rgba(241,232,218,.65)}
