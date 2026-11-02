@@ -15,18 +15,19 @@
 <meta property="og:locale" content="ru_RU">
 <meta name="yandex-verification" content="d9f589fef325e9d0">
 <meta name="google-site-verification" content="pnLnfS823Q0rIGMMzhC5BRVrdBE3R6R_nhYXdDHy6yo">
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript">
+<!-- Yandex.Metrika counter: загружается после согласия на cookie -->
+<script>
+window.ymLoad = function () {
     (function(m,e,t,r,i,k,a){
         m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
         m[i].l=1*new Date();
         for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
         k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
     })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=114006042', 'ym');
-
     ym(114006042, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+};
+try { if (localStorage.getItem('cookie_consent') === 'all') window.ymLoad(); } catch (e) {}
 </script>
-<noscript><div><img src="https://mc.yandex.ru/watch/114006042" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
 <!-- /Yandex.Metrika counter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,7 +79,7 @@
 <footer class="site"><div class="wrap">
   <a class="brand" href="/"><img src="/logo.jpg" alt="" width="46" height="46"><span><b>Живая компания</b><small>© 2026 · ИИ-помощники для экспертов и малого бизнеса</small></span></a>
   <nav><a href="tel:+79156915800">+7 915 691-58-00</a><a href="/dlya-biznesa/">Бизнесу</a><a href="/dlya-specialistov/">Специалистам</a><a href="/blog/">Блог</a><a href="https://vk.com/club192464942" target="_blank" rel="noopener">ВКонтакте</a><a href="https://t.me/zivayaco" target="_blank" rel="noopener">Telegram</a></nav>
-  <p class="legal">ИП Волкова Анастасия Александровна · ИНН 711615287500 · ОГРНИП 325710000050057</p>
+  <p class="legal">ИП Волкова Анастасия Александровна · ИНН 711615287500 · ОГРНИП 325710000050057 · <a href="/politika/">Политика обработки персональных данных</a> · <a href="#" data-cookie-settings>Настройки cookie</a></p>
 </div></footer>
 <script>
 (()=>{const bar=document.querySelector('.progress i'),art=document.querySelector('.prose');

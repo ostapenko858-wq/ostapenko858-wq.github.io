@@ -428,3 +428,14 @@ footer.site .legal{flex-basis:100%;margin:0;color:rgba(241,232,218,.55)}
 @media(prefers-reduced-motion:reduce){.nav a.primary,.as-msg,.as-opts>*{animation:none}}
 
 .cta .cta-note{margin-top:-10px;font-size:14px;color:rgba(241,232,218,.65)}
+
+/* Плашка cookie (site.js) */
+.cookie{position:fixed;z-index:60;left:16px;right:16px;bottom:16px;max-width:620px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px;padding:18px 20px;background:var(--deep);color:var(--beige);border-radius:20px;box-shadow:0 20px 40px -12px rgba(0,0,0,.5);font-size:15px;line-height:1.5;animation:pop .35s cubic-bezier(.3,1.5,.5,1) both}
+.cookie p{margin:0;flex:1 1 300px}
+.cookie a{color:var(--gold)}
+.cookie div{display:flex;gap:10px;flex-wrap:wrap}
+.cookie button{font:600 14px var(--text);padding:10px 16px;border-radius:999px;cursor:pointer;border:1.5px solid rgba(241,232,218,.4);background:transparent;color:var(--beige)}
+.cookie button.yes{background:var(--copper);border-color:var(--copper);color:#fff}
+.cookie button:hover{transform:translateY(-1px)}
+footer.site .legal a{color:rgba(241,232,218,.75)}
+.policy h2 .n{display:none}
