@@ -27,6 +27,11 @@
     content: {label: 'Пишу посты и веду соцсети', solution: 'Контент-завод: черновики постов, статей и карточек в вашем стиле, вы только правите', price: [40000, 80000], weeks: '2–3 недели', share: .5},
     other: {label: 'Другое, опишу сам', solution: 'Решение под вашу задачу, подберём на бесплатном аудите', price: [40000, 120000], weeks: 'от 2 недель', share: .3}
   };
+  // Здесь помощник не только экономит время, но и возвращает заявки, которые сейчас теряются
+  const MONEY_TASKS = ['answers', 'booking', 'sales'];
+  const RECOVER = .5;  // возвращаем примерно половину потерянных заявок
+  const MARGIN = .5;   // в окупаемость берём половину этой выручки: остальное — расходы на саму услугу или товар
+
   const TASKS_BY = {
     biz: ['answers', 'booking', 'reports', 'prices', 'sales', 'stock', 'training', 'content', 'other'],
     spec: ['diaries', 'reflection', 'answers', 'booking', 'content', 'other']
@@ -40,6 +45,11 @@
      options: a => a.who === 'spec'
        ? [[1000, 'До 1 500 ₽'], [2000, '1 500–3 000 ₽'], [4000, '3 000–5 000 ₽'], [6000, 'Больше 5 000 ₽']]
        : [[300, 'Около 50 000 ₽ в месяц'], [450, 'Около 75 000 ₽'], [600, 'Около 100 000 ₽'], [1500, 'Это делаю я сам, и моё время дороже']]},
+    {key: 'lost', when: a => MONEY_TASKS.includes(a.task),
+     q: 'Сколько заявок или клиентов в месяц теряете: не успели ответить, ответили утром, клиент забыл о записи?',
+     options: () => [[0, 'Почти не теряем'], [2, '1–3'], [5, '4–7'], [10, 'Больше 7']]},
+    {key: 'check', when: a => MONEY_TASKS.includes(a.task) && a.lost > 0, q: 'Какой у вас средний чек?',
+     options: () => [[1500, 'До 2 000 ₽'], [3500, '2 000–5 000 ₽'], [7500, '5 000–10 000 ₽'], [15000, 'Больше 10 000 ₽']]},
     {key: 'when', q: 'Когда хотелось бы запустить?', options: () => [['fast', 'В ближайшие 2 недели'], ['month', 'В течение месяца'], ['later', 'Не спешу, сначала разобраться']]},
     {key: 'budget', q: 'Последний вопрос: какой бюджет на разработку для вас комфортен?', options: () => [[40000, 'До 40 000 ₽'], [70000, '40–70 000 ₽'], [150000, '70–150 000 ₽'], [0, 'Пока не знаю']]}
   ];
@@ -64,7 +74,10 @@
 
   function ask() {
     const s = STEPS[idx];
-    counter.textContent = `Вопрос ${idx + 1 - skipped} из ${STEPS.length - skipped}`;
+    // Вопросы про заявки считаем заранее, как только выбрана задача (ответ «почти не теряем» уберёт вопрос про чек)
+    const ahead = Object.assign({lost: 1}, answers);
+    const shown = STEPS.filter(x => !x.when || x.when(ahead));
+    counter.textContent = `Вопрос ${shown.indexOf(s) + 1 - skipped} из ${shown.length - skipped}`;
     typing(() => {
       say(typeof s.q === 'function' ? s.q(answers) : s.q);
       opts.innerHTML = '';
@@ -106,6 +119,7 @@
 
   function next() {
     idx += 1;
+    while (idx < STEPS.length && STEPS[idx].when && !STEPS[idx].when(answers)) idx += 1;
     if (idx < STEPS.length) ask(); else result();
   }
 
@@ -114,18 +128,19 @@
     const t = TASKS[answers.task];
     const freed = answers.hours * 4.3 * t.share;            // часов в месяц
     const saved = freed * answers.rate;                      // ₽ в месяц
-    const net = saved - RUNNING;
+    const recovered = (answers.lost || 0) * RECOVER * (answers.check || 0);  // выручка, которая вернётся
+    const net = saved + recovered * MARGIN - RUNNING;
     const [p0, p1] = t.price;
     const priceText = p0 === p1 ? rub(p0) : `от ${rub(p0)}, для такой задачи обычно ${rub(p0)}–${rub(p1)}`;
 
     let verdict;
     if (net <= 0) {
-      verdict = `<p class="as-verdict bad">Честно: по этим цифрам помощник себя не окупит. Экономия меньше, чем он стоит в месяц. Возможно, вам пока дешевле оставить всё как есть, и на аудите мы скажем то же самое.</p>`;
+      verdict = `<p class="as-verdict bad">Честно: по этим цифрам помощник себя не окупит. Выгода меньше, чем он стоит в месяц. Возможно, вам пока дешевле оставить всё как есть, и на аудите мы скажем то же самое.</p>`;
     } else {
       const fast = p0 / net, slow = p1 / net, middle = (fast + slow) / 2;
       const range = p0 === p1 ? months(fast) : (Math.ceil(fast) === Math.ceil(slow) ? months(fast) : `${Math.ceil(fast)}–${months(slow)}`);
-      if (middle <= 6) verdict = `<p class="as-verdict good">Окупится за счёт освободившегося времени примерно за ${range}.</p>`;
-      else if (middle <= 12) verdict = `<p class="as-verdict mid">Окупится, но не быстро: примерно за ${range}. Стоит начать с самой затратной части процесса, тогда срок сократится.</p>`;
+      if (middle <= 6) verdict = `<p class="as-verdict good">Окупится примерно за ${range}.</p>`;
+      else if (fast <= 12) verdict = `<p class="as-verdict mid">Окупится, но не быстро: примерно за ${range}. Стоит начать с самой затратной части процесса, тогда срок сократится.</p>`;
       else verdict = `<p class="as-verdict bad">Окупаться будет дольше года. Обсудим на аудите, есть ли смысл: иногда выгоднее не делать.</p>`;
     }
 
@@ -145,17 +160,18 @@
         <dl>
           <div><dt>Освободится</dt><dd>~${Math.round(freed)} ч в месяц</dd></div>
           <div><dt>Стоимость этого времени</dt><dd>~${rub(saved)} в месяц</dd></div>
+          ${recovered ? `<div><dt>Вернёт выручки</dt><dd>~${rub(recovered)} в месяц</dd></div>` : ''}
           <div><dt>Разработка</dt><dd>${priceText}</dd></div>
           <div><dt>Срок</dt><dd>${t.weeks}</dd></div>
           <div><dt>Расходы после запуска</dt><dd>1 200–2 500 ₽ в месяц</dd></div>
         </dl>
         ${verdict}
         ${notes.map(n => `<p class="as-note">${n}</p>`).join('')}
-        <p class="as-small">Считали осторожно: помощник берёт на себя около ${Math.round(t.share * 100)}% этой работы. Точные цифры — после бесплатного аудита.</p>
+        <p class="as-small">Считали осторожно: помощник берёт на себя около ${Math.round(t.share * 100)}% этой работы${recovered ? ' и возвращает примерно половину потерянных заявок, а в окупаемость идёт только половина этой выручки' : ''}. Точные цифры — после бесплатного аудита.</p>
       </div>`);
       // Код расчёта зашит в ссылку на бота: по нему бот находит расчёт и отдаёт его основательнице. Человек кода не видит
       const code = Array.from({length: 6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
-      report(t, freed, saved, verdict.replace(/<[^>]+>/g, ''), code);
+      report(t, freed, saved, recovered, verdict.replace(/<[^>]+>/g, ''), code);
       typing(() => {
         say(ENDPOINT
           ? 'Если расчёт вам подходит, давайте обсудим. Кнопка «Обсудить в Telegram» откроет наш чат, и расчёт уже будет у нас: пересказывать ничего не нужно.'
@@ -177,11 +193,12 @@
     });
   }
 
-  function report(t, freed, saved, verdict, code) {
+  function report(t, freed, saved, recovered, verdict, code) {
     if (!ENDPOINT) return;
     const data = {
       who: answers.who, task: t.label, other: answers.otherText || '', hours: answers.hours, rate: answers.rate,
       when: answers.when, budget: answers.budget, freed: Math.round(freed), saved: Math.round(saved),
+      lost: answers.lost || 0, check: answers.check || 0, recovered: Math.round(recovered),
       verdict, page: location.pathname, code, seconds: Math.round((Date.now() - startedAt) / 1000)
     };
     // text/plain без чтения ответа — простой запрос, браузеру не нужен предварительный CORS-запрос
@@ -192,8 +209,7 @@
     answers = {}; idx = 0; skipped = 0; startedAt = Date.now();
     log.innerHTML = ''; opts.innerHTML = '';
     if (root.dataset.who) { answers.who = root.dataset.who; idx = skipped = 1; }
-    const count = ['шесть', 'пять'][skipped];
-    say(`Здравствуйте. Я помощник «Живой компании». За ${count} вопросов прикину, сколько времени вам может вернуть ИИ, сколько это стоит и когда окупится. Если не окупится, так и скажу.`);
+    say('Здравствуйте. Я помощник «Живой компании». За пару минут прикину, сколько времени и денег вам может вернуть ИИ, сколько это стоит и когда окупится. Если не окупится, так и скажу.');
     ask();
   }
 
