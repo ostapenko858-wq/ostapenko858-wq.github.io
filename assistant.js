@@ -12,6 +12,8 @@
   // Сервер на Railway пересылает расчёт основательнице в Telegram (без контактов посетителя)
   const ENDPOINT = root.dataset.endpoint;
   const BOT = root.dataset.bot;
+  // Цели Метрики: calc_done — расчёт пройден, contact_tg / contact_phone / contact_vk — нажал кнопку связи
+  const goal = name => { try { if (window.ym && root.dataset.metrika) ym(+root.dataset.metrika, 'reachGoal', name); } catch (e) {} };
   const RUNNING = 2000; // ₽ в месяц: сервер + нейросеть, середина вилки 1 200–2 500
 
   const TASKS = {
@@ -172,14 +174,16 @@
       // Код расчёта зашит в ссылку на бота: по нему бот находит расчёт и отдаёт его основательнице. Человек кода не видит
       const code = Array.from({length: 6}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('');
       report(t, freed, saved, recovered, verdict.replace(/<[^>]+>/g, ''), code);
+      goal('calc_done');
       typing(() => {
         say(ENDPOINT
           ? 'Если расчёт вам подходит, давайте обсудим. Кнопка «Обсудить в Telegram» откроет наш чат, и расчёт уже будет у нас: пересказывать ничего не нужно.'
           : 'Если расчёт вам подходит, давайте обсудим: напишите нам в Telegram или ВК, либо позвоните.');
         opts.innerHTML = '';
-        const link = (href, text, cls) => {
+        const link = (href, text, cls, name) => {
           const a = document.createElement('a');
           a.className = cls; a.href = href; a.textContent = text;
+          a.addEventListener('click', () => goal(name));
           if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener'; }
           return a;
         };
@@ -187,8 +191,8 @@
         again.type = 'button'; again.className = 'as-again'; again.textContent = 'Посчитать заново';
         again.onclick = start;
         const tg = ENDPOINT ? `https://t.me/${BOT}?start=calc_${code}` : TG;
-        opts.append(link(tg, 'Обсудить в Telegram', 'as-send'), link(PHONE, 'Позвонить', 'as-send as-alt'),
-                    link(VK_CHAT, 'Написать в ВК', 'as-send as-alt'), again);
+        opts.append(link(tg, 'Обсудить в Telegram', 'as-send', 'contact_tg'), link(PHONE, 'Позвонить', 'as-send as-alt', 'contact_phone'),
+                    link(VK_CHAT, 'Написать в ВК', 'as-send as-alt', 'contact_vk'), again);
       });
     });
   }
