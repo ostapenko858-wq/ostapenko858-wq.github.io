@@ -371,6 +371,35 @@ footer.site .legal{flex-basis:100%;margin:0;color:rgba(241,232,218,.55)}
 .as-opts .as-alt{border-color:var(--green);background:#fff}
 @media(max-width:640px){.contacts{grid-template-columns:minmax(0,1fr)}}
 
+/* Главная: сравнение с разработчиками ботов */
+.compare{width:100%;border-collapse:separate;border-spacing:0;background:var(--cream);border:1px solid var(--beige-2);border-radius:24px;overflow:hidden;font-size:16px}
+.compare th,.compare td{padding:16px 20px;text-align:left;vertical-align:top;border-top:1px solid var(--beige-2);line-height:1.5}
+.compare thead th{border-top:0;font:800 13px/1.3 var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:#fff}
+.compare thead th.us{color:var(--forest);background:#E3EDD5}
+.compare td:first-child{font-weight:700;color:var(--copper);width:26%}
+.compare td.us{background:#E3EDD5;font-weight:600;color:var(--deep)}
+.compare-wrap{overflow-x:auto}
+/* Главная: что находили у других */
+.found{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.fnd{display:flex;flex-direction:column;gap:12px;padding:26px;background:#fff;border:1px solid var(--beige-2);border-radius:24px}
+.fnd h3{margin:0;font:800 20px/1.3 var(--display);color:var(--green)}
+.fnd .ba{margin:0}
+.fnd .ba div.none{background:#F3E4D3}
+.fnd .ba div.none span{color:var(--copper)}
+.real.st-none{background:#F3E4D3;color:#8A3A1E}
+/* Главная: флагманский кейс */
+.flag{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:32px;padding:40px;border-radius:28px;background:radial-gradient(120% 140% at 100% 0%,#3D7C45 0%,var(--green) 50%,var(--deep) 100%);color:var(--beige)}
+.flag h3{margin:0 0 6px;font:800 clamp(24px,2.8vw,32px)/1.2 var(--display)}
+.flag dl{margin:0}
+.flag dt{margin-top:18px;font:700 11px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.flag dd{margin:5px 0 0;font-size:16px;line-height:1.55;color:rgba(241,232,218,.9)}
+.flag .nums{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;align-content:start}
+.flag .num{padding:18px;border-radius:18px;background:rgba(241,232,218,.08);border:1px solid rgba(241,232,218,.18)}
+.flag .num b{display:block;font:800 30px/1.05 var(--display);color:var(--gold)}
+.flag .num span{display:block;margin-top:6px;font-size:14px;line-height:1.4;color:rgba(241,232,218,.82)}
+.flag .flag-note{grid-column:1/-1;margin:0;padding-top:16px;border-top:1px solid rgba(241,232,218,.2);font-size:15px;color:rgba(241,232,218,.75)}
+@media(max-width:900px){.flag{grid-template-columns:minmax(0,1fr);padding:28px}.flag .nums{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.compare,.compare tbody,.compare tr,.compare td{display:block;width:auto}.compare thead{display:none}.compare tr{border-top:1px solid var(--beige-2);padding:6px 0}.compare tr:first-child{border-top:0}.compare td{border-top:0;padding:8px 18px;font-size:15px}.compare td:first-child{padding-top:16px;width:auto}.compare td[data-h]::before{content:attr(data-h);display:block;font:700 11px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}.compare td.us{border-radius:14px;margin:4px 12px 14px;padding:10px 12px}.compare td.us::before{color:var(--forest)}.fnd{padding:22px}}
 /* Живость: кнопки пружинят, плитки приподнимаются */
 .btn-vk,.btn-vk-outline,.nav a,.as-opts button,.as-send,.contact{transition:transform .2s cubic-bezier(.3,1.6,.5,1),box-shadow .2s ease,background .15s ease,color .15s ease}
 .btn-vk:hover,.btn-vk-outline:hover,.nav a:hover,.as-opts button:hover,.as-send:hover{transform:translateY(-2px)}
