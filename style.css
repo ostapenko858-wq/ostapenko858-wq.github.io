@@ -283,6 +283,8 @@ header.site .wrap{flex-wrap:wrap}
 .doubt{padding:26px 28px;background:var(--cream);border-radius:24px;border:1px solid var(--beige-2)}
 .doubt h3{margin:0 0 10px;font:700 19px/1.35 var(--display);color:var(--copper)}
 .doubt p{margin:0;font-size:17px;line-height:1.6}
+.doubt p.ex{margin-top:12px;padding-top:12px;border-top:1px solid var(--beige-2);font-size:15px;color:var(--muted)}
+.doubt p.ex b{color:var(--ink)}
 .cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .case{position:relative;overflow:hidden;padding:30px;border-radius:26px;background:radial-gradient(120% 140% at 100% 0%,#3D7C45 0%,var(--green) 50%,var(--deep) 100%);color:var(--beige)}
 .case-n{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--copper);color:#fff;font:800 14px var(--display)}
@@ -344,7 +346,7 @@ header.site .wrap{flex-wrap:wrap}
 
 .real.st-proto{background:#F6E6CF;color:#7A4A14}
 .real.st-review{background:var(--beige);color:var(--muted)}
-.steps{grid-template-columns:repeat(5,1fr)}
+.steps{grid-template-columns:repeat(4,1fr)}
 .tasks{display:grid;gap:12px}
 .task{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:24px;align-items:center;padding:20px 24px;background:#fff;border:1px solid var(--beige-2);border-radius:20px}
 .task h3{margin:0 0 4px;font:700 18px/1.3 var(--display);color:var(--green)}
@@ -352,7 +354,7 @@ header.site .wrap{flex-wrap:wrap}
 .task-stage b{display:block;margin-top:8px;font:700 14px var(--display);color:var(--copper)}
 .task.done .task-stage b{color:var(--green)}
 .task-stage span{display:block;font-size:14px;line-height:1.45;color:var(--muted)}
-.track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;list-style:none;margin:0;padding:0}
+.track{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;list-style:none;margin:0;padding:0}
 .track li{height:8px;border-radius:4px;background:var(--beige-2)}
 .track li.on{background:var(--leaf)}
 .track li.cur{background:var(--copper)}
